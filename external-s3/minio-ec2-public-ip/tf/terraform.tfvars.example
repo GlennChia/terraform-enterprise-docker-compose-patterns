@@ -1,0 +1,9 @@
+region               = "us-east-1"
+minio_allowed_ip     = "0.0.0.0/0"
+instance_type        = "t2.micro"
+resource_prefix      = "ec2-minio"
+minio_s3_api_port    = 80
+minio_console_port   = 9001
+minio_s3_access_key  = "AKIAIOSFODNN7EXAMPLE"
+minio_s3_secret_key  = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+minio_default_bucket = "default-bucket"
