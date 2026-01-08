@@ -1,0 +1,106 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: tfe-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tfe_network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: tfe-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tfe_network
+    restart: unless-stopped
+
+  tfe:
+    image: images.releases.hashicorp.com/hashicorp/terraform-enterprise:${TFE_VERSION:-1.1.2}
+    container_name: tfe
+    ports:
+      - "443:8443"
+      - "80:8080"
+    environment:
+      TFE_HOSTNAME: ${TFE_HOSTNAME}
+      TFE_HTTP_PORT: 8080
+      TFE_HTTPS_PORT: 8443
+      TFE_IACT_SUBNETS: "0.0.0.0/0"
+
+      TFE_DATABASE_HOST: postgres:5432
+      TFE_DATABASE_NAME: ${POSTGRES_DB}
+      TFE_DATABASE_USER: ${POSTGRES_USER}
+      TFE_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      TFE_DATABASE_PARAMETERS: "sslmode=disable"
+
+      TFE_REDIS_HOST: redis:6379
+      TFE_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      TFE_REDIS_USE_TLS: "false"
+      TFE_REDIS_USE_AUTH: "true"
+
+      TFE_OBJECT_STORAGE_TYPE: "s3"
+      TFE_OBJECT_STORAGE_S3_USE_INSTANCE_PROFILE: "false"
+      TFE_OBJECT_STORAGE_S3_BUCKET: ${S3_BUCKET_NAME}
+      TFE_OBJECT_STORAGE_S3_ENDPOINT: ${S3_ENDPOINT}
+      TFE_OBJECT_STORAGE_S3_REGION: ${S3_REGION}
+      TFE_OBJECT_STORAGE_S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY}
+      TFE_OBJECT_STORAGE_S3_SECRET_ACCESS_KEY: ${S3_SECRET_KEY}
+
+      TFE_TLS_CERT_FILE: /etc/ssl/private/tfe.crt
+      TFE_TLS_KEY_FILE: /etc/ssl/private/tfe.key
+
+      TFE_LICENSE: ${TFE_LICENSE}
+      TFE_ENCRYPTION_PASSWORD: ${TFE_ENCRYPTION_PASSWORD}
+
+      TFE_CAPACITY_CONCURRENCY: "10"
+      TFE_CAPACITY_MEMORY: "512"
+
+      TFE_OPERATIONAL_MODE: "external"
+
+    volumes:
+      - ./certs/tfe.crt:/etc/ssl/private/tfe.crt:ro
+      - ./certs/tfe.key:/etc/ssl/private/tfe.key:ro
+      - tfe_data:/var/lib/terraform-enterprise
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - tfe_network
+    restart: unless-stopped
+    cap_add:
+      - IPC_LOCK
+
+networks:
+  tfe_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  tfe_data:
+    driver: local
