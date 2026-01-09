@@ -6,9 +6,17 @@
 
 # 2. Deployment
 
-Step 1: Copy [terraform.tfvars.example](./tf/terraform.tfvars.example) to `terraform.tfvars` and adjust the variables accordingly.
+Step 1: Configure AWS credentials. For example:
 
-Step 2: In [tf](./tf/) run `terraform init` and `terraform apply --auto-approve`. Note the outputs that will be used to connect to the console.
+```bash
+export AWS_ACCESS_KEY_ID=example
+export AWS_SECRET_ACCESS_KEY=example
+export AWS_SESSION_TOKEN=example
+```
+
+Step 2: Copy [terraform.tfvars.example](./tf/terraform.tfvars.example) to `terraform.tfvars` and adjust the variables accordingly.
+
+Step 3: In [tf](./tf/) run `terraform init` and `terraform apply --auto-approve`. Note the outputs that will be used to connect to the console.
 
 # 3. Verify
 
