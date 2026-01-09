@@ -143,7 +143,7 @@ Copy the token created
 Create a `~/.terraformrc` file with the following content, replacing `xxxxxx.atlasv1.zzzzzzzzzzzzz` with the team token created in the previous step:
 
 ```hcl
-credentials "app.terraform.io" {
+credentials "tfe.local" {
   token = "xxxxxx.atlasv1.zzzzzzzzzzzzz"
 }
 ```
