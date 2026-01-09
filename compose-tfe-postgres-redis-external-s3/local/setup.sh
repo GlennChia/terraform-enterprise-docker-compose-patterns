@@ -181,8 +181,9 @@ function install_certificate_to_keychain {
 
     log_info "Checking if certificate is already in keychain..."
 
-    # Check if certificate is already trusted in System keychain
-    if security find-certificate -c "tfe.local" -a -Z /Library/Keychains/System.keychain &>/dev/null; then
+    # Check if certificate is already trusted in System keychain (exact match)
+    CERT_CHECK=$(security find-certificate -a /Library/Keychains/System.keychain 2>/dev/null | grep "\"alis\"<blob>=\"tfe.local\"" || echo "")
+    if [[ -n "$CERT_CHECK" ]]; then
         log_info "Certificate already exists in System keychain."
 
         # Verify if it's trusted
