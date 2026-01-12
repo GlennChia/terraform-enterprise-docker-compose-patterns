@@ -93,13 +93,9 @@ services:
   tfe:
     image: images.releases.hashicorp.com/hashicorp/terraform-enterprise:$${TFE_VERSION}
     container_name: tfe
-    group_add:
-      - "DOCKER_GROUP_ID_DYNAMIC"
     ports:
       - "443:443"
       - "80:80"
-    extra_hosts:
-      - "tfe.ec2:DOCKER_GATEWAY_IP"
     environment:
       TFE_HOSTNAME: $${TFE_HOSTNAME}
       TFE_HTTP_PORT: 80
@@ -179,16 +175,6 @@ echo "${tfe_license}" | docker login --username terraform images.releases.hashic
 
 # Pull TFE image
 docker pull images.releases.hashicorp.com/hashicorp/terraform-enterprise:${tfe_version}
-
-# Get Docker bridge gateway IP
-DOCKER_GATEWAY=$(docker network inspect bridge | grep -oP '(?<="Gateway": ")[^"]*' | head -1)
-
-# Get Docker socket GID dynamically
-DOCKER_SOCKET_GID=$(stat -c '%g' /var/run/docker.sock)
-
-# Update docker-compose.yml with the actual gateway IP and Docker GID
-sed -i "s/DOCKER_GATEWAY_IP/$DOCKER_GATEWAY/" docker-compose.yml
-sed -i "s/DOCKER_GROUP_ID_DYNAMIC/$DOCKER_SOCKET_GID/" docker-compose.yml
 
 # Start Docker Compose services
 docker-compose up -d
