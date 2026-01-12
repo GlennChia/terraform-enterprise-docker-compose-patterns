@@ -40,12 +40,12 @@ services:
     image: images.releases.hashicorp.com/hashicorp/terraform-enterprise:${TFE_VERSION:-1.1.2}
     container_name: tfe
     ports:
-      - "443:8443"
-      - "80:8080"
+      - "443:443"
+      - "80:80"
     environment:
       TFE_HOSTNAME: ${TFE_HOSTNAME}
-      TFE_HTTP_PORT: 8080
-      TFE_HTTPS_PORT: 8443
+      TFE_HTTP_PORT: 80
+      TFE_HTTPS_PORT: 443
       TFE_IACT_SUBNETS: "0.0.0.0/0"
 
       TFE_DATABASE_HOST: postgres:5432
@@ -67,8 +67,9 @@ services:
       TFE_OBJECT_STORAGE_S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY}
       TFE_OBJECT_STORAGE_S3_SECRET_ACCESS_KEY: ${S3_SECRET_KEY}
 
-      TFE_TLS_CERT_FILE: /etc/ssl/private/tfe.crt
-      TFE_TLS_KEY_FILE: /etc/ssl/private/tfe.key
+      TFE_TLS_CERT_FILE: /etc/ssl/private/terraform-enterprise/tfe.crt
+      TFE_TLS_KEY_FILE: /etc/ssl/private/terraform-enterprise/tfe.key
+      TFE_TLS_CA_BUNDLE_FILE: /etc/ssl/private/terraform-enterprise/tfe.crt
 
       TFE_LICENSE: ${TFE_LICENSE}
       TFE_ENCRYPTION_PASSWORD: ${TFE_ENCRYPTION_PASSWORD}
@@ -77,18 +78,27 @@ services:
       TFE_CAPACITY_MEMORY: "512"
 
       TFE_OPERATIONAL_MODE: "external"
+      TFE_RUN_PIPELINE_DOCKER_NETWORK: "local_tfe_network"
 
     volumes:
-      - ./certs/tfe.crt:/etc/ssl/private/tfe.crt:ro
-      - ./certs/tfe.key:/etc/ssl/private/tfe.key:ro
-      - tfe_data:/var/lib/terraform-enterprise
+      - type: bind
+        source: ./certs
+        target: /etc/ssl/private/terraform-enterprise
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+      - type: volume
+        source: tfe_data
+        target: /var/lib/terraform-enterprise
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     networks:
-      - tfe_network
+      tfe_network:
+        aliases:
+          - ${TFE_HOSTNAME}
     restart: unless-stopped
     cap_add:
       - IPC_LOCK

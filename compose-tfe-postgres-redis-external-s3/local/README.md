@@ -120,10 +120,6 @@ Workspace created
 
 ![workspace created](./docs/03-testing/02-create-workspace/03-workspace-created.png)
 
-In the workspace settings, set `Execution Mode` to `Local (custom)`
-
-![workspace general settings](./docs/03-testing/02-create-workspace/04-workspace-general-settings.png)
-
 ## 4.3 Generate team token
 
 From the organization settings page under `Security`, choose `API tokens`, choose `Team Tokens`, and `Create a team token`.
@@ -152,53 +148,63 @@ credentials "tfe.local" {
 
 Run `terraform init` in [tf-cli-test](./tf-cli-test/)
 
-![terraform init](./docs/03-testing/04-terraform-commands/01-terraform-init.png)
+![terraform init](./docs/03-testing/04-terraform-commands/01-apply/01-terraform-init.png)
 
 Run `terraform apply`
 
-![terraform apply](./docs/03-testing/04-terraform-commands/02-terraform-apply.png)
+![terraform apply](./docs/03-testing/04-terraform-commands/01-apply/02-terraform-apply.png)
 
-At this point, an `archivistterraform` path is created in the S3 object storage
+Workspace runs shows a run that is `Triggered via CLI` and in the `Planned` state
 
-![archivistterraform](./docs/03-testing/04-terraform-commands/03-archivistterraform.png)
+![tfe workspace runs](./docs/03-testing/04-terraform-commands/01-apply/03-tfe-workspace-runs.png)
 
-This path eventually contains a file
+Workspace run details shows `Plan finished`
 
-![archivistterraform slugs file](./docs/03-testing/04-terraform-commands/07-archivistterraform-slugs-file.png)
+![tfe workspace run details](./docs/03-testing/04-terraform-commands/01-apply/04-tfe-workspace-run-details.png)
 
-Proceed to approve the terraform apply
+S3 bucket contains an `archivistterraform` directory
 
-![terraform apply approve](./docs/03-testing/04-terraform-commands/09-terraform-apply-approve.png)
+![s3 bucket](./docs/03-testing/04-terraform-commands/01-apply/05-s3-bucket.png)
 
-Verify that the workspace contains the state with the ID `sv-SjgKV5a3XgwGRYvc`
+The `archivistterraform` directory contains other sub-directories
 
-![workspace states](./docs/03-testing/04-terraform-commands/10-workspace-states.png)
+![s3 archivistterraform](./docs/03-testing/04-terraform-commands/01-apply/06-s3-archivistterraform.png)
+
+Proceed to approve the terraform apply and let the apply complete
+
+![terraform apply complete](./docs/03-testing/04-terraform-commands/02-apply-approve/01-terraform-apply-complete.png)
+
+TFE shows `Apply finished`
+
+![tfe workspace run](./docs/03-testing/04-terraform-commands/02-apply-approve/02-tfe-workspace-run.png)
+
+Verify that the workspace contains the state. Note the state ID.
+
+![tfe workspace states](./docs/03-testing/04-terraform-commands/02-apply-approve/03-tfe-workspace-states.png)
 
 State details
 
-![state details](./docs/03-testing/04-terraform-commands/11-state-details.png)
+![tfe workspace state details](./docs/03-testing/04-terraform-commands/02-apply-approve/04-tfe-workspace-state-details.png)
 
-Additionally, run `terraform state list` to show that the resources managed by state can be viewed locally
+The `archivistterraform` directory now contains the `states` sub-directory
 
-![terraform state list](./docs/03-testing/04-terraform-commands/12-terraform-state-list.png)
+![s3 archivistterraform](./docs/03-testing/04-terraform-commands/02-apply-approve/05-s3-archivistterraform.png)
 
-After the terraform apply, the `archivistterraform` path contains a `states` path
+The `states` directory contains the state directory with an ID that matches the state ID in TFE.
 
-![archivistterraform states](./docs/03-testing/04-terraform-commands/14-archivistterraform-states.png)
+![s3 archivistterraform states](./docs/03-testing/04-terraform-commands/02-apply-approve/06-s3-archivistterraform-states.png)
 
-Within the `states` path there is an ID that matches the ID seen in the workspace state
+This contains 2 other directories
 
-![archivistterraform states sub dir](./docs/03-testing/04-terraform-commands/15-archivistterraform-states-sub-dir.png)
+![s3 archivistterraform state sub dir](./docs/03-testing/04-terraform-commands/02-apply-approve/07-s3-archivistterraform-state-sub-dir.png)
 
-Within this path there are 2 further sub directories
+View file in directory 1
 
-![archivistterraform states sub dir sub dir](./docs/03-testing/04-terraform-commands/16-archivistterraform-states-sub-dir-sub-dir.png)
+![s3 archivistterraform state file1](./docs/03-testing/04-terraform-commands/02-apply-approve/08-s3-archivistterraform-state-file1.png)
 
-Each of these sub directories contain their own files
+View file in directory 2
 
-![archivistterraform states sub dir sub dir state file1](./docs/03-testing/04-terraform-commands/17-archivistterraform-states-sub-dir-sub-dir-state-file1.png)
-
-![archivistterraform states sub dir sub dir state file2](./docs/03-testing/04-terraform-commands/19-archivistterraform-states-sub-dir-sub-dir-state-file2.png)
+![s3 archivistterraform state file2](./docs/03-testing/04-terraform-commands/02-apply-approve/09-s3-archivistterraform-state-file2.png)
 
 # 5. Cleanup
 
