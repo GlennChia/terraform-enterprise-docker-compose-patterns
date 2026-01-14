@@ -1,0 +1,25 @@
+region         = "us-east-1"
+tfe_allowed_ip = "0.0.0.0/0"
+instance_type  = "m5.large"
+resource_prefix = "ec2-tfe"
+
+# TFE Configuration
+tfe_version             = "1.1.2"
+tfe_hostname            = "tfe.ec2"
+tfe_license             = "REPLACE"
+tfe_encryption_password = "REPLACE"
+
+# Database Configuration
+postgres_user     = "tfeadmin"
+postgres_password = "REPLACE"
+postgres_db       = "tfe"
+
+# Redis Configuration
+redis_password = "REPLACE"
+
+# S3 Configuration
+s3_endpoint     = "http://replace" # example "http://55.56.57.58:80"
+s3_bucket_name  = "REPLACE"
+s3_region       = "us-east-1"
+s3_access_key   = "REPLACE"
+s3_secret_key   = "REPLACE"
